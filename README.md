@@ -1,2 +1,2 @@
-# COQ-or-Isabelle
-goal is to represent DTL in both languages and see what suits best
+# COQ-Isabelle
+Goal is to represent Temporal Logics (LTL and DTL) and use that definition to represent a protocol of synchronous messages
