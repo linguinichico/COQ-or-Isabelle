@@ -78,6 +78,150 @@ Unset Strict Implicit.
   Notation "'Y' P" := (previous P) (at level 100).
   Notation "P1 'S' P2" := (back P1 P2) (at level 100).
 
+(* ===================================================== *)
+
+(* ========= GETTING CLASSICAL LOGIC RESULTS =========== *)
+
+Definition peirce := forall P Q:Prop, ((P->Q)->P)->P.
+Definition classic := forall P:Prop, ~~P -> P.
+Definition excluded_middle := forall P:Prop, P\/~P.
+Definition de_morgan_not_and_not := forall P Q:Prop, ~(~P/\~Q)->P\/Q.
+Definition implies_to_or := forall P Q:Prop, (P->Q)->(~P\/Q).
+
+Lemma excluded_middle_to_classic : excluded_middle -> classic.
+Proof.
+  unfold excluded_middle, classic.
+  intros.
+  elim H with (P:=P).
+  intro; assumption.
+  intro; apply False_ind.
+  apply H0; assumption.
+Qed.
+
+Lemma classic_to_peirce : classic -> peirce.
+Proof.
+  unfold classic, peirce.
+  intros.
+  apply H.
+  intro.
+  apply H1.
+  apply H0.
+  intro.
+  apply False_ind.
+  apply H1.
+  apply H2.
+Qed.
+
+Lemma de_morgan_not_and_not_to_excluded_middle : de_morgan_not_and_not -> excluded_middle.
+Proof.
+  unfold de_morgan_not_and_not, excluded_middle.
+  intros.
+  apply H.
+  intro.
+  destruct H0.
+  apply H1.
+  assumption.
+Qed.
+
+Lemma peirce_to_de_morgan_not_and_not : peirce -> de_morgan_not_and_not.
+Proof.
+  unfold peirce,de_morgan_not_and_not.
+  intros.
+  apply H with (Q:=False).
+  intro.
+  apply False_ind.
+  apply H0.
+  split.
+  intro.
+  apply H1.
+  left.
+  assumption.
+  intro.
+  apply H1.
+  right.
+  assumption.
+Qed.
+
+Lemma de_morgan_not_and_not_to_implies_to_or : de_morgan_not_and_not -> implies_to_or.
+Proof.
+  unfold implies_to_or, de_morgan_not_and_not.
+  intros.
+  induction H with (P:=~P) (Q:=Q).
+  left.
+  assumption.
+  right.
+  assumption.
+  intro.
+  elim H1.
+  intros.
+  apply H3.
+  apply H0.
+  induction H with (P:=P) (Q:=~P).
+  assumption.
+  apply False_ind.
+  apply H2.
+  assumption.
+  intro.
+  apply H2.
+  destruct H4.
+  assumption.
+Qed.
+
+Lemma implies_to_or_to_excluded_middle : implies_to_or -> excluded_middle.
+Proof.
+  unfold excluded_middle, implies_to_or.
+intros H P.
+  induction (H P P).
+  auto.
+  auto.
+  auto.
+Qed.
+
+Axiom classic_2 : forall P : Prop, ~~P -> P.
+
+Lemma classic_1 : forall P Q:Prop, ((P->Q)->P)->P.
+Proof.
+  apply classic_to_peirce.
+  unfold classic.
+  intros.
+  apply classic_2.
+  assumption.
+Qed.
+
+Lemma classic_3 : forall P:Prop, P\/~P.
+Proof.
+  apply de_morgan_not_and_not_to_excluded_middle.
+  apply peirce_to_de_morgan_not_and_not.
+  apply classic_to_peirce.
+  unfold classic.
+  intros.
+  apply classic_2.
+  assumption.
+Qed.
+
+Lemma classic_4 : forall P Q:Prop, ~(~P/\~Q)->P\/Q.
+Proof.
+  apply peirce_to_de_morgan_not_and_not.
+  apply classic_to_peirce.
+  unfold classic.
+  intros.
+  apply classic_2.
+  assumption.
+Qed.
+
+Lemma classic_5 : forall P Q:Prop, (P->Q)->(~P\/Q).
+Proof.
+  apply de_morgan_not_and_not_to_implies_to_or.
+  apply peirce_to_de_morgan_not_and_not.
+  apply classic_to_peirce.
+  unfold classic.
+  intros.
+  apply classic_2.
+  assumption.
+Qed.
+
+(* ===================================================== *)
+
 (* ===================== PRE REQUISITES ================ *)
 
 Lemma always_assumption : forall P Q : stream_formula, (forall s : stream, (G Q) s -> P s) -> forall s : stream, (G Q) s -> (G P) s.
